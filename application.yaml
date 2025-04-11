@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-appforCICD-aplication
+  # You'll usually want to add your resources to the argocd namespace.
+  namespace: argoCD
+spec:
+  # The project the application belongs to.
+  project: default
+  # Source of the application manifests
+  source:
+    repoURL: https://github.com/MalickReborn/Complete-_devsecops_gitops_CICD_project_gitops_config.git  # Can point to either a Helm chart repo or a git repo.
+    targetRevision: HEAD  # react to last changes.
+    path: dev  
+  # Destination cluster and namespace to deploy the application
+  destination:
+    # cluster API URL
+    server: https://kubernetes.default.svc
+    # or cluster name
+    # name: in-cluster
+    # The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
+    namespace: argoCD
+  # Sync policy
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated: # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
+      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
+      selfHeal: true # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
