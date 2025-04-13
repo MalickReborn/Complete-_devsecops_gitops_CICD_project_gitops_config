@@ -3,7 +3,7 @@ kind: Application
 metadata:
   name: argocd-appforCICD-application
   # You'll usually want to add your resources to the argocd namespace.
-  namespace: argoCD
+  namespace: argocd
 spec:
   # The project the application belongs to.
   project: default
@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/MalickReborn/Complete-_devsecops_gitops_CICD_project_gitops_config.git  # Can point to either a Helm chart repo or a git repo.
     targetRevision: HEAD  # react to last changes.
-    path: dev  
+    path: K8s_manifests  
   # Destination cluster and namespace to deploy the application
   destination:
     # cluster API URL
