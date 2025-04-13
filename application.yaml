@@ -4,6 +4,13 @@ metadata:
   name: argocd-appforCICD-application
   # You'll usually want to add your resources to the argocd namespace.
   namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: flask_forCICD=malickguess/flaskfordevsecops
+    argocd-image-updater.argoproj.io/nginx.update-strategy: latest
+    argocd-image-updater.argoproj.io/nginx.ignore-tags: latest, master
+    argocd-image-updater.argoproj.io/git-branch: main
+    argocd-image-updater.argoproj.io/write-back-method: git
+    argocd-image-updater.argoproj.io/write-back-target: kustomization
 spec:
   # The project the application belongs to.
   project: default
