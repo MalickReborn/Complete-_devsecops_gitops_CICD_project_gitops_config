@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask_forCICD
+  labels:
+    environment: development
+    usage: test
+spec:
+  replicas: 2
+  selector:
+    matchLabels: 
+      app: flask
+  template:
+    metadata:
+      name: flask_forCICD_app
+      app: flask
+    containers:
+      - name: flask_forCICD
+        image: malickguess/flaskfordevsecops
+        ports:
+          containerPort: 5000
+
+
+
