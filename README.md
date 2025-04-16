@@ -26,6 +26,7 @@ ArgoCD synchronizes Kubernetes manifests stored in the K8s_manifests/ directory 
 
 ##Prerequisites
 Operational Kubernetes cluster (for us 1 master node, 1 worker node on VMware VMs . You could use ay cluster setup , EKS, AKs, microk8s, minikube, itw).
+[![vm-provisioned.png](https://i.postimg.cc/qvjgjT8X/vm-provisioned.png)](https://postimg.cc/rDR8w7ZK)
 
 K8s_manifests/ directory containing kustomization.yaml, flaskforCICD.yaml (deployment), and service.yaml (service) on your SCM platform.
 
@@ -259,6 +260,8 @@ helm repo update
 kubectl create namespace monitoring
 helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
 ```
+[![pronmetheus-installed.png](https://i.postimg.cc/LXZX9gGN/pronmetheus-installed.png)](https://postimg.cc/62twzqWv)
+
  Configuration
    _Prometheus_:
 Automatically collects metrics from nodes, pods, and Kubernetes services.
@@ -283,12 +286,14 @@ Access Grafana via port-forwarding:
 ```
 kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80
 ```
+[![grafanamonitoring.png](https://i.postimg.cc/zfyD7RD8/grafanamonitoring.png)](https://postimg.cc/LqMM65Zb)
 Default credentials: admin / prom-operator (change after first login).
 
 - Import dashboards:
   Cluster: ID 6417 (node metrics).
   Pods: ID 15760 (pod metrics).
 - Flask: Create a custom dashboard for /metrics (e.g., HTTP requests, latency).
+  [![grafanamonitoring.png](https://i.postimg.cc/zfyD7RD8/grafanamonitoring.png)](https://postimg.cc/LqMM65Zb)
 
   _Alerts_:
 Configure alerts for critical thresholds (e.g., pod failures or high latency).
