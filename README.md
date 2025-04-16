@@ -41,15 +41,16 @@ Access to Docker Hub for container images.
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
+[![argoinstalled.png](https://i.postimg.cc/ZndTmkBg/argoinstalled.png)](https://postimg.cc/p5PNQ6BY)
  Access the ArgoCD UI via port-forwarding:
 ```
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
-
  Retrieve the initial password for the admin user:
 ```
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
+[![argo-working.png](https://i.postimg.cc/qBPK34LN/argo-working.png)](https://postimg.cc/MXYXkkgw)
 
 Configuring the ArgoCD Application
 An ArgoCD application file is created to monitor the K8s_manifests/ directory and apply manifests using Kustomize.
