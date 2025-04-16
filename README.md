@@ -50,7 +50,6 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 Configuring the ArgoCD Application
 An ArgoCD application file is created to monitor the K8s_manifests/ directory and apply manifests using Kustomize.
 File: argocd-application.yaml
-          yaml
           
           apiVersion: argoproj.io/v1alpha1
           kind: Application
@@ -88,10 +87,9 @@ kubectl apply -f argocd-application.yaml
 ```
 
 
-Kubernetes Manifests
+**_Kubernetes Manifests_**
 The manifests are organized in K8s_manifests/ and use Kustomize for customization.
-File: K8s_manifests/kustomization.yaml
-      yaml
+  File: K8s_manifests/kustomization.yaml
       
       apiVersion: kustomize.config.k8s.io/v1beta1
       kind: Kustomization
@@ -100,8 +98,7 @@ File: K8s_manifests/kustomization.yaml
         - service.yaml
       namespace: default
 
-File: K8s_manifests/flaskforCICD.yaml
-      yaml
+  File: K8s_manifests/flaskforCICD.yaml
       
       apiVersion: apps/v1
       kind: Deployment
@@ -131,8 +128,7 @@ File: K8s_manifests/flaskforCICD.yaml
                   cpu: "200m"
                   memory: "256Mi"
 
-File: K8s_manifests/service.yaml
-      yaml
+  File: K8s_manifests/service.yaml
       
       apiVersion: v1
       kind: Service
@@ -155,15 +151,15 @@ The service exposes port 5000 (standard for Flask) on port 5000 internally.
 Kustomize groups the manifests for consistent application.
 
 
-ArgoCD Image Updater
-ArgoCD Image Updater monitors new versions of the flask-app image on Docker Hub, updates the manifests in the GitHub repository, and triggers synchronization via ArgoCD.
-Installation
+**_ArgoCD Image Updater_**
+  ArgoCD Image Updater monitors new versions of the flask-app image on Docker Hub, updates the manifests in the GitHub repository, and triggers synchronization via ArgoCD.
+
+  Installation
 Install ArgoCD Image Updater in the argocd namespace:
-bash
-
+```
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/manifests/install.yaml
-
-Configuration
+```
+  Configuration
 Add annotations to the deployment manifest to specify the image to monitor:
 Modified File: K8s_manifests/flaskforCICD.yaml
 yaml
@@ -174,10 +170,10 @@ metadata:
   name: flask-app
   namespace: default
   annotations:
-    argocd-image-updater.argoproj.io/image-list: flask-app=docker.io/<your-user>/flask-app
-    argocd-image-updater.argoproj.io/update-strategy: latest
-    argocd-image-updater.argoproj.io/write-back-method: git
-    argocd-image-updater.argoproj.io/git-branch: main
+    _argocd-image-updater.argoproj.io/image-list: flask-app=docker.io/<your-user>/flask-app_
+    _argocd-image-updater.argoproj.io/update-strategy: latest_
+    _argocd-image-updater.argoproj.io/write-back-method: git_
+    _argocd-image-updater.argoproj.io/git-branch: main_
 spec:
   replicas: 2
   selector:
@@ -201,16 +197,16 @@ spec:
             cpu: "200m"
             memory: "256Mi"
 
-Annotations Explained:
-image-list: Maps the flask-app alias to the Docker Hub image.
+  Annotations Explained:
+  image-list: Maps the flask-app alias to the Docker Hub image.
+  
+  update-strategy: latest: Uses the latest image version.
+  
+  write-back-method: git: Updates the manifest in the GitHub repository.
+  
+  git-branch: main: Specifies the target branch for commits.
 
-update-strategy: latest: Uses the latest image version.
-
-write-back-method: git: Updates the manifest in the GitHub repository.
-
-git-branch: main: Specifies the target branch for commits.
-
-Registry Configuration
+  Registry Configuration
 Create a secret to allow Image Updater to access Docker Hub:
 bash
 
@@ -221,26 +217,25 @@ kubectl create secret docker-registry dockerhub-secret -n argocd \
 
 Update the ArgoCD Image Updater ConfigMap to use the secret:
 File: argocd-image-updater-config.yaml
-yaml
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: argocd-image-updater-config
-  namespace: argocd
-data:
-  registries: |
-    - name: dockerhub
-      api_url: https://registry-1.docker.io
-      prefix: docker.io
-      credentials: secret:argocd/dockerhub-secret
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: argocd-image-updater-config
+      namespace: argocd
+    data:
+      registries: |
+        - name: dockerhub
+          api_url: https://registry-1.docker.io
+          prefix: docker.io
+          credentials: secret:argocd/dockerhub-secret
 
 Apply:
-bash
-
+```
 kubectl apply -f argocd-image-updater-config.yaml
+```
 
-Workflow
+#### Workflow
 The CI pipeline pushes a new image (e.g., <your-user>/flask-app:<new-tag>) to Docker Hub.
 
 ArgoCD Image Updater detects the new image.
@@ -249,24 +244,25 @@ It updates K8s_manifests/flaskforCICD.yaml in the GitHub repository (e.g., chang
 
 ArgoCD detects the repository change and synchronizes the cluster with the new version.
 
-Monitoring with Prometheus and Grafana
-Prometheus collects metrics from the Kubernetes cluster and the Flask application, while Grafana provides visualizations through dashboards.
-Installation
-Install Prometheus and Grafana using the kube-prometheus-stack Helm chart:
-bash
 
+### Monitoring with Prometheus and Grafana
+Prometheus collects metrics from the Kubernetes cluster and the Flask application, while Grafana provides visualizations through dashboards.
+
+  Installation
+Install Prometheus and Grafana using the kube-prometheus-stack Helm chart:
+```
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 kubectl create namespace monitoring
 helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
-
-Configuration
-Prometheus:
+```
+ Configuration
+   _Prometheus_:
 Automatically collects metrics from nodes, pods, and Kubernetes services.
 
-For the Flask application, expose a /metrics endpoint (e.g., using prometheus-flask-exporter in your Python code):
-python
-
+- For the Flask application, expose a /metrics endpoint (e.g., using prometheus-flask-exporter in your Python code):
+```
+#python
 from flask import Flask
 from prometheus_flask_exporter import PrometheusMetrics
 
@@ -276,30 +272,28 @@ metrics = PrometheusMetrics(app)
 @app.route('/')
 def hello():
     return 'Hello, World!'
-
+```
 Expose this endpoint in the manifest (e.g., via a dedicated port or annotation).
 
-Grafana:
+   _Grafana_:
 Access Grafana via port-forwarding:
-bash
-
+```
 kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80
-
+```
 Default credentials: admin / prom-operator (change after first login).
 
-Import dashboards:
-Cluster: ID 6417 (node metrics).
+- Import dashboards:
+  Cluster: ID 6417 (node metrics).
+  
+  Pods: ID 15760 (pod metrics).
 
-Pods: ID 15760 (pod metrics).
+- Flask: Create a custom dashboard for /metrics (e.g., HTTP requests, latency).
 
-Flask: Create a custom dashboard for /metrics (e.g., HTTP requests, latency).
-
-Alerts:
+  _Alerts_:
 Configure alerts for critical thresholds (e.g., pod failures or high latency).
 
 Example rule:
-yaml
-
+```
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -323,25 +317,24 @@ spec:
         severity: critical
       annotations:
         summary: "Flask-app pod not running"
+```
+Apply: `kubectl apply -f prometheus-rules.yaml.`
 
-Apply: kubectl apply -f prometheus-rules.yaml.
+## Next Steps
 
-Next Steps
-Configure notifications for Prometheus alerts (e.g., via Slack or Alertmanager).
+- Configure notifications for Prometheus alerts (e.g., via Slack or Alertmanager).
 
-Implement custom metrics for the Flask application (e.g., error counters or business metrics).
+- Implement custom metrics for the Flask application (e.g., error counters or business metrics).
 
-Set up advanced deployment strategies (canary, blue-green) with ArgoCD.
+- Set up advanced deployment strategies (canary, blue-green) with ArgoCD.
 
-Secure manifests with Sealed Secrets or a secret manager like Vault.
+- Secure manifests with Sealed Secrets or a secret manager like Vault.
 
-Notes
-Replace <your-user> and <your-repo> with your actual Docker Hub username and GitHub repository.
+##Notes
 
-Verify that the dockerhub-secret is correctly configured for ArgoCD Image Updater.
-
-Validate manifests with kubeval or kustomize build K8s_manifests/ | kubectl apply --dry-run=client before pushing.
-
-Back up Grafana dashboards as JSON files for re-importing if needed.
+- Replace <your-user> and <your-repo> with your actual Docker Hub username and GitHub repository.
+- Verify that the dockerhub-secret is correctly configured for ArgoCD Image Updater.
+- Validate manifests with kubeval or kustomize build K8s_manifests/ | kubectl apply --dry-run=client before pushing.
+- Back up Grafana dashboards as JSON files for re-importing if needed.
 
 
