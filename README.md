@@ -1,74 +1,77 @@
 # Complete-_devsecops_gitops_CICD_project_gitops_config
+CI/CD DevSecOps Project (Part 2: GitOps and Monitoring)
 
 This repo is the Continuous Deployment and Gitops part of the earlier https://github.com/MalickReborn/Complete-_devsecops_gitops_CICD_project
 
 
+This documentation will be shape following this structure:
 
-README - CI/CD DevSecOps Project (Part 2: GitOps and Monitoring)
 Table of Contents
-Introduction (#introduction)
+- Introduction (#introduction)
 
-GitOps with ArgoCD (#gitops-with-argocd)
+- GitOps with ArgoCD (#gitops-with-argocd)
 
-ArgoCD Image Updater (#argocd-image-updater)
+- ArgoCD Image Updater (#argocd-image-updater)
 
-Monitoring with Prometheus and Grafana (#monitoring-with-prometheus-and-grafana)
+- Monitoring with Prometheus and Grafana (#monitoring-with-prometheus-and-grafana)
 
-Next Steps (#next-steps)
+- Next Steps (#next-steps)
+- Notes
 
-Introduction
-This section of the README outlines the implementation of a GitOps approach using ArgoCD to manage deployments of a Flask application on a Kubernetes cluster (1 master node, 1 worker node on VMware VMs). ArgoCD Image Updater monitors container image updates on Docker Hub and triggers automatic synchronizations. Prometheus and Grafana provide monitoring for the cluster and the application. The CI pipeline (GitHub → Jenkins → tests, scans, build, push to Docker Hub) is already in place and populates the container registry.
-GitOps with ArgoCD
+## Introduction
+This section of the README outlines the implementation of a GitOps approach using ArgoCD to manage deployments of a Flask application on a Kubernetes cluster . 
+
+ArgoCD Image Updater monitors container image updates on Docker Hub and triggers automatic synchronizations. Prometheus and Grafana provide monitoring for the cluster and the application. The CI pipeline (GitHub → Jenkins → tests, scans, build, push to Docker Hub) is already in place and populates the container registry.
 ArgoCD synchronizes Kubernetes manifests stored in the K8s_manifests/ directory of the GitHub repository with the Kubernetes cluster, following a declarative GitOps approach.
-Prerequisites
-Operational Kubernetes cluster (1 master node, 1 worker node on VMware VMs).
 
-K8s_manifests/ directory containing kustomization.yaml, flaskforCICD.yaml (deployment), and service.yaml (service).
+##Prerequisites
+Operational Kubernetes cluster (for us 1 master node, 1 worker node on VMware VMs . You could use ay cluster setup , EKS, AKs, microk8s, minikube, itw).
+
+K8s_manifests/ directory containing kustomization.yaml, flaskforCICD.yaml (deployment), and service.yaml (service) on your SCM platform.
 
 Access to Docker Hub for container images.
 
-Installing ArgoCD
-Create the argocd namespace and install ArgoCD:
-bash
-
+## Installing ArgoCD
+ Create the argocd namespace and install ArgoCD:
+```
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-Access the ArgoCD UI via port-forwarding:
-bash
-
+```
+ Access the ArgoCD UI via port-forwarding:
+```
 kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
 
-Retrieve the initial password for the admin user:
-bash
-
+ Retrieve the initial password for the admin user:
+```
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
 
 Configuring the ArgoCD Application
 An ArgoCD application file is created to monitor the K8s_manifests/ directory and apply manifests using Kustomize.
 File: argocd-application.yaml
-yaml
-
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: flask-app
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: https://github.com/<your-repo>/<your-project>
-    targetRevision: main
-    path: K8s_manifests
-    kustomize:
-      namePrefix: flask-
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: default
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+          yaml
+          
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
+            name: flask-app
+            namespace: argocd
+          spec:
+            project: default
+            source:
+              repoURL: https://github.com/<your-repo>/<your-project>
+              targetRevision: main
+              path: K8s_manifests
+              kustomize:
+                namePrefix: flask-
+            destination:
+              server: https://kubernetes.default.svc
+              namespace: default
+            syncPolicy:
+              automated:
+                prune: true
+                selfHeal: true
 
 Explanation:
 path: K8s_manifests: Points to the directory containing kustomization.yaml.
@@ -80,75 +83,77 @@ namePrefix: flask-: Adds a prefix to resources for clarity.
 syncPolicy.automated: Enables automatic synchronization with pruning and self-healing.
 
 Apply the file:
-bash
-
+```
 kubectl apply -f argocd-application.yaml
+```
+
 
 Kubernetes Manifests
 The manifests are organized in K8s_manifests/ and use Kustomize for customization.
 File: K8s_manifests/kustomization.yaml
-yaml
-
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - flaskforCICD.yaml
-  - service.yaml
-namespace: default
+      yaml
+      
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      resources:
+        - flaskforCICD.yaml
+        - service.yaml
+      namespace: default
 
 File: K8s_manifests/flaskforCICD.yaml
-yaml
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: flask-app
-  namespace: default
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: flask-app
-  template:
-    metadata:
-      labels:
-        app: flask-app
-    spec:
-      containers:
-      - name: flask-app
-        image: docker.io/<your-user>/flask-app:latest
-        ports:
-        - containerPort: 5000
-        resources:
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-          requests:
-            cpu: "200m"
-            memory: "256Mi"
+      yaml
+      
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: flask-app
+        namespace: default
+      spec:
+        replicas: 2
+        selector:
+          matchLabels:
+            app: flask-app
+        template:
+          metadata:
+            labels:
+              app: flask-app
+          spec:
+            containers:
+            - name: flask-app
+              image: docker.io/<your-user>/flask-app:latest
+              ports:
+              - containerPort: 5000
+              resources:
+                limits:
+                  cpu: "500m"
+                  memory: "512Mi"
+                requests:
+                  cpu: "200m"
+                  memory: "256Mi"
 
 File: K8s_manifests/service.yaml
-yaml
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: flask-app
-  namespace: default
-spec:
-  selector:
-    app: flask-app
-  ports:
-  - port: 80
-    targetPort: 5000
-  type: ClusterIP
+      yaml
+      
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: flask-app
+        namespace: default
+      spec:
+        selector:
+          app: flask-app
+        ports:
+        - port: 5000
+          targetPort: 5000
+        type: ClusterIP
 
 Notes:
-The deployment uses the flask-app:latest image (replace with your Docker Hub image).
+The deployment uses the flask-app:latest image (You can replace with your Docker Hub image).
 
-The service exposes port 5000 (standard for Flask) on port 80 internally.
+The service exposes port 5000 (standard for Flask) on port 5000 internally.
 
 Kustomize groups the manifests for consistent application.
+
 
 ArgoCD Image Updater
 ArgoCD Image Updater monitors new versions of the flask-app image on Docker Hub, updates the manifests in the GitHub repository, and triggers synchronization via ArgoCD.
