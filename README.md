@@ -31,7 +31,11 @@ K8s_manifests/ directory containing kustomization.yaml, flaskforCICD.yaml (deplo
 
 Access to Docker Hub for container images.
 
-## Installing ArgoCD
+
+
+## GitOps with ArgoCD
+
+  Installation
  Create the argocd namespace and install ArgoCD:
 ```
 kubectl create namespace argocd
@@ -145,10 +149,9 @@ The manifests are organized in K8s_manifests/ and use Kustomize for customizatio
 
 Notes:
 The deployment uses the flask-app:latest image (You can replace with your Docker Hub image).
-
 The service exposes port 5000 (standard for Flask) on port 5000 internally.
-
 Kustomize groups the manifests for consistent application.
+
 
 
 ## ArgoCD Image Updater
@@ -238,12 +241,10 @@ kubectl apply -f argocd-image-updater-config.yaml
 
 #### Workflow
 The CI pipeline pushes a new image (e.g., <your-user>/flask-app:<new-tag>) to Docker Hub.
-
 ArgoCD Image Updater detects the new image.
-
 It updates K8s_manifests/flaskforCICD.yaml in the GitHub repository (e.g., changes image: ...:latest to image: ...:<new-tag>) and commits the change.
-
 ArgoCD detects the repository change and synchronizes the cluster with the new version.
+
 
 
 ## Monitoring with Prometheus and Grafana
@@ -285,9 +286,7 @@ Default credentials: admin / prom-operator (change after first login).
 
 - Import dashboards:
   Cluster: ID 6417 (node metrics).
-  
   Pods: ID 15760 (pod metrics).
-
 - Flask: Create a custom dashboard for /metrics (e.g., HTTP requests, latency).
 
   _Alerts_:
@@ -321,15 +320,16 @@ spec:
 ```
 Apply: `kubectl apply -f prometheus-rules.yaml.`
 
+
+
 ## Next Steps
 
 - Configure notifications for Prometheus alerts (e.g., via Slack or Alertmanager).
-
 - Implement custom metrics for the Flask application (e.g., error counters or business metrics).
-
 - Set up advanced deployment strategies (canary, blue-green) with ArgoCD.
-
 - Secure manifests with Sealed Secrets or a secret manager like Vault.
+
+
 
 ## Notes
 
