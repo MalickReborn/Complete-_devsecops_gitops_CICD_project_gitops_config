@@ -151,7 +151,8 @@ The service exposes port 5000 (standard for Flask) on port 5000 internally.
 Kustomize groups the manifests for consistent application.
 
 
-**_ArgoCD Image Updater_**
+## ArgoCD Image Updater
+
   ArgoCD Image Updater monitors new versions of the flask-app image on Docker Hub, updates the manifests in the GitHub repository, and triggers synchronization via ArgoCD.
 
   Installation
