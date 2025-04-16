@@ -1,7 +1,7 @@
 # Complete-_devsecops_gitops_CICD_project_gitops_config
 CI/CD DevSecOps Project (Part 2: GitOps and Monitoring)
 
-This repo is the Continuous Deployment and Gitops part of the earlier https://github.com/MalickReborn/Complete-_devsecops_gitops_CICD_project
+This repo is the Continuous Deployment and Gitops part of the earlier [Continuous Integration part repository.](https://github.com/MalickReborn/Complete-_devsecops_gitops_CICD_project)
 
 
 This documentation will be shape following this structure:
