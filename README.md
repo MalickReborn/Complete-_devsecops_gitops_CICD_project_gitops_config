@@ -18,7 +18,7 @@ Table of Contents
 - Next Steps (#next-steps)
 - Notes
 
-## Introduction
+## 1. Introduction
 This section of the README outlines the implementation of a GitOps approach using ArgoCD to manage deployments of a Flask application on a Kubernetes cluster . 
 
 ArgoCD Image Updater monitors container image updates on Docker Hub and triggers automatic synchronizations. Prometheus and Grafana provide monitoring for the cluster and the application. The CI pipeline (GitHub → Jenkins → tests, scans, build, push to Docker Hub) is already in place and populates the container registry.
@@ -33,7 +33,7 @@ Access to Docker Hub for container images.
 
 
 
-## GitOps with ArgoCD
+## 2. GitOps with ArgoCD
 
   Installation
  Create the argocd namespace and install ArgoCD:
@@ -154,7 +154,7 @@ Kustomize groups the manifests for consistent application.
 
 
 
-## ArgoCD Image Updater
+## 3. ArgoCD Image Updater
 
   ArgoCD Image Updater monitors new versions of the flask-app image on Docker Hub, updates the manifests in the GitHub repository, and triggers synchronization via ArgoCD.
 
@@ -247,7 +247,7 @@ ArgoCD detects the repository change and synchronizes the cluster with the new v
 
 
 
-## Monitoring with Prometheus and Grafana
+## 4. Monitoring with Prometheus and Grafana
 Prometheus collects metrics from the Kubernetes cluster and the Flask application, while Grafana provides visualizations through dashboards.
 
   Installation
@@ -322,7 +322,7 @@ Apply: `kubectl apply -f prometheus-rules.yaml.`
 
 
 
-## Next Steps
+## 5. Next Steps
 
 - Configure notifications for Prometheus alerts (e.g., via Slack or Alertmanager).
 - Implement custom metrics for the Flask application (e.g., error counters or business metrics).
@@ -331,7 +331,7 @@ Apply: `kubectl apply -f prometheus-rules.yaml.`
 
 
 
-## Notes
+## 6. Notes
 
 - Replace <your-user> and <your-repo> with your actual Docker Hub username and GitHub repository.
 - Verify that the dockerhub-secret is correctly configured for ArgoCD Image Updater.
