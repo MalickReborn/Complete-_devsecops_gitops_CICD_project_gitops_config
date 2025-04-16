@@ -245,7 +245,7 @@ It updates K8s_manifests/flaskforCICD.yaml in the GitHub repository (e.g., chang
 ArgoCD detects the repository change and synchronizes the cluster with the new version.
 
 
-### Monitoring with Prometheus and Grafana
+## Monitoring with Prometheus and Grafana
 Prometheus collects metrics from the Kubernetes cluster and the Flask application, while Grafana provides visualizations through dashboards.
 
   Installation
@@ -330,7 +330,7 @@ Apply: `kubectl apply -f prometheus-rules.yaml.`
 
 - Secure manifests with Sealed Secrets or a secret manager like Vault.
 
-##Notes
+## Notes
 
 - Replace <your-user> and <your-repo> with your actual Docker Hub username and GitHub repository.
 - Verify that the dockerhub-secret is correctly configured for ArgoCD Image Updater.
