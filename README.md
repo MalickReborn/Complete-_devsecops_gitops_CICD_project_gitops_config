@@ -34,7 +34,7 @@ Access to Docker Hub for container images.
 
 
 
-## 2. GitOps with ArgoCD
+## 2. GitOps with ArgoCD stack
 
   Installation
  Create the argocd namespace and install ArgoCD:
